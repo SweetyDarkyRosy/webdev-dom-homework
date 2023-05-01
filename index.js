@@ -1,10 +1,82 @@
 const addFormButton = document.querySelector(".add-form-button");
 const commentSection = document.querySelector(".comments");
 
+let gComments = [];			// Array of comments
+
+
+// Comment class
+class CComment {
+	constructor(headerText, commentText) {
+		this.headerText = headerText;
+		this.commentText = commentText;
+		this.likeCount = 0;
+		this.isLikedByUser = false;
+	}
+
+	getCommentCode() {
+		const commentItem = document.createElement("li");
+		commentItem.classList.add("comment");
+		commentItem.innerHTML = commentTemplate;
+
+		{
+			const newCommentHeader = commentItem.querySelector(".comment-header");
+	
+			const newCommentHeaderName = document.createElement("div");
+			newCommentHeaderName.innerHTML = this.headerText;
+			newCommentHeader.appendChild(newCommentHeaderName);
+	
+			let currTime = new Date();
+	
+			const newCommentHeaderTime = document.createElement("div");
+			newCommentHeaderTime.innerHTML = currTime.getDate() + '.' + (currTime.getMonth() + 1) + '.' + currTime.getFullYear() +
+				' ' + currTime.getHours() + ':' + currTime.getMinutes();
+			newCommentHeader.appendChild(newCommentHeaderTime);
+		}
+	
+		{
+			const newCommentText = commentItem.querySelector(".comment-text");
+			newCommentText.innerHTML = this.commentText;
+		}
+
+		{
+			const likeCount = commentItem.querySelector(".likes-counter");
+			likeCount.innerHTML = String(this.likeCount);
+		}
+
+		{
+			const likeButton = commentItem.querySelector(".like-button");
+			if (this.isLikedByUser === true)
+			{
+				likeButton.classList.add("-active-like");
+			}
+
+			likeButton.addEventListener("click", () => {
+				if (this.isLikedByUser === true)
+				{
+					this.isLikedByUser = false;
+					this.likeCount--;
+				}
+				else
+				{
+					this.isLikedByUser = true;
+					this.likeCount++;
+				}
+
+				renderComments();
+			});
+		}
+
+		return commentItem;
+	}
+}
+
+// Comment template for HTML code
 const commentTemplate = '<div class="comment-header"></div><div class="comment-body">\
 	<div class="comment-text"></div></div><div class="comment-footer"><div class="likes">\
-	<span class="likes-counter">0</span><button class="like-button"></button></div></div>';
+	<span class="likes-counter"></span><button class="like-button"></button></div></div>';
 
+
+/*
 function addComment(name, commentText) {
 	const newComment = document.createElement("li");
 	newComment.classList.add("comment");
@@ -32,6 +104,28 @@ function addComment(name, commentText) {
 	}
 
 	commentSection.appendChild(newComment);
+}
+*/
+
+function renderComments() {
+	// Cleaning up
+	commentSection.innerHTML = "";
+
+	// Filling the comment section
+	for (let i = 0; i < gComments.length; i++)
+	{
+		const comment = gComments[i];
+		const newComment = comment.getCommentCode();
+	
+		commentSection.appendChild(newComment);
+	}
+}
+
+function addComment(headerText, commentText) {
+	const newComment = new CComment(headerText, commentText);
+	gComments.push(newComment);
+
+	renderComments();
 }
 
 window.addEventListener("load", () => {
