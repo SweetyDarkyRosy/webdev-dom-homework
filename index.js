@@ -29,7 +29,12 @@ class CComment {
 			const newCommentHeader = commentItem.querySelector(".comment-header");
 	
 			const newCommentHeaderName = document.createElement("div");
-			newCommentHeaderName.innerHTML = this.headerText;
+
+			let formatedCommentHeaderNameStr = this.headerText;
+			formatedCommentHeaderNameStr = formatedCommentHeaderNameStr.replaceAll('<', "&lt;");
+			formatedCommentHeaderNameStr = formatedCommentHeaderNameStr.replaceAll('>', "&gt;");
+			newCommentHeaderName.innerHTML = formatedCommentHeaderNameStr;
+
 			newCommentHeader.appendChild(newCommentHeaderName);
 	
 			let currTime = new Date();
@@ -41,9 +46,11 @@ class CComment {
 	
 		{
 			const newCommentText = commentItem.querySelector(".comment-text");
-			
-			let newCommentTextStr = this.commentText;
-			newCommentText.innerHTML = newCommentTextStr.replace(/(?:\r\n|\r|\n)/g, "<br>");
+
+			let formatedCommentTextStr = this.commentText;
+			formatedCommentTextStr = formatedCommentTextStr.replaceAll('<', "&lt;");
+			formatedCommentTextStr = formatedCommentTextStr.replaceAll('>', "&gt;");
+			newCommentText.innerHTML = formatedCommentTextStr.replaceAll(/(?:\r\n|\r|\n)/g, "<br>");
 
 			newCommentText.addEventListener("click", (event) => {
 				event.stopPropagation();

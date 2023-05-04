@@ -58,6 +58,8 @@ body {
   .comment-body {
     margin-top: 32px;
     margin-bottom: 32px;
+
+    cursor: pointer;
   }
 
   .comment-text {
