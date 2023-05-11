@@ -11,6 +11,13 @@ class CComment {
 		this.commentText = commentText;
 		this.likeCount = 0;
 		this.isLikedByUser = false;
+
+		{
+			let currTime = new Date();
+
+			this.addTime = currTime.getDate() + '.' + (currTime.getMonth() + 1) + '.' + currTime.getFullYear() +
+				' ' + currTime.getHours() + ':' + currTime.getMinutes();
+		}
 	}
 
 	getCommentCode() {
@@ -22,20 +29,41 @@ class CComment {
 			const newCommentHeader = commentItem.querySelector(".comment-header");
 	
 			const newCommentHeaderName = document.createElement("div");
-			newCommentHeaderName.innerHTML = this.headerText;
+
+			let formatedCommentHeaderNameStr = this.headerText;
+			formatedCommentHeaderNameStr = formatedCommentHeaderNameStr.replaceAll('<', "&lt;");
+			formatedCommentHeaderNameStr = formatedCommentHeaderNameStr.replaceAll('>', "&gt;");
+			newCommentHeaderName.innerHTML = formatedCommentHeaderNameStr;
+
 			newCommentHeader.appendChild(newCommentHeaderName);
 	
 			let currTime = new Date();
 	
 			const newCommentHeaderTime = document.createElement("div");
-			newCommentHeaderTime.innerHTML = currTime.getDate() + '.' + (currTime.getMonth() + 1) + '.' + currTime.getFullYear() +
-				' ' + currTime.getHours() + ':' + currTime.getMinutes();
+			newCommentHeaderTime.innerHTML = this.addTime;
 			newCommentHeader.appendChild(newCommentHeaderTime);
 		}
 	
 		{
 			const newCommentText = commentItem.querySelector(".comment-text");
-			newCommentText.innerHTML = this.commentText;
+
+			let formatedCommentTextStr = this.commentText;
+			formatedCommentTextStr = formatedCommentTextStr.replaceAll('<', "&lt;");
+			formatedCommentTextStr = formatedCommentTextStr.replaceAll('>', "&gt;");
+			newCommentText.innerHTML = formatedCommentTextStr.replaceAll(/(?:\r\n|\r|\n)/g, "<br>");
+
+			newCommentText.addEventListener("click", (event) => {
+				event.stopPropagation();
+
+				const addFormComment = document.querySelector(".add-form-text");
+
+				if (addFormComment.value.length != 0)
+				{
+					addFormComment.value += '\n';
+				}
+
+				addFormComment.value = addFormComment.value + '> ' + this.commentText + '\n\n' + this.headerText + ',';
+			});
 		}
 
 		{
@@ -50,7 +78,9 @@ class CComment {
 				likeButton.classList.add("-active-like");
 			}
 
-			likeButton.addEventListener("click", () => {
+			likeButton.addEventListener("click", (event) => {
+				event.stopPropagation();
+
 				if (this.isLikedByUser === true)
 				{
 					this.isLikedByUser = false;
@@ -146,6 +176,9 @@ window.addEventListener("load", () => {
 		}
 
 		addComment(nameInput.value, commentText.value);
+
+		nameInput.value = '';
+		commentText.value = '';
 	});
 
 	nameInput.addEventListener("click", (event) => {
