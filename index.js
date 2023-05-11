@@ -1,7 +1,7 @@
 const addFormButton = document.querySelector(".add-form-button");
 const commentSection = document.querySelector(".comments");
 
-let gComments = [];			// Array of comments
+let comments = [];
 
 
 // Comment class
@@ -18,6 +18,15 @@ class CComment {
 			this.addTime = currTime.getDate() + '.' + (currTime.getMonth() + 1) + '.' + currTime.getFullYear() +
 				' ' + currTime.getHours() + ':' + currTime.getMinutes();
 		}
+	}
+
+	getRawCommentData() {
+		let rawCommentData = {
+			"name": this.commentText,
+			"text": this.headerText
+		};
+
+		return rawCommentData;
 	}
 
 	getCommentCode() {
@@ -106,59 +115,55 @@ const commentTemplate = '<div class="comment-header"></div><div class="comment-b
 	<span class="likes-counter"></span><button class="like-button"></button></div></div>';
 
 
-/*
-function addComment(name, commentText) {
-	const newComment = document.createElement("li");
-	newComment.classList.add("comment");
-	newComment.innerHTML = commentTemplate;
+function LoadAllComments() {
+	const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
+		{
+			method: "GET"
+		});
+	
+	fetchPromise.then((response) => {
+		const jsonPromise = response.json();
 
-	{
-		const newCommentHeader = newComment.querySelector(".comment-header");
-
-		const newCommentHeaderName = document.createElement("div");
-		newCommentHeaderName.innerHTML = name;
-		newCommentHeader.appendChild(newCommentHeaderName);
-
-		let currTime = new Date();
-		console.log(currTime.getDate());
-
-		const newCommentHeaderTime = document.createElement("div");
-		newCommentHeaderTime.innerHTML = currTime.getDate() + '.' + (currTime.getMonth() + 1) + '.' + currTime.getFullYear() +
-			' ' + currTime.getHours() + ':' + currTime.getMinutes();
-		newCommentHeader.appendChild(newCommentHeaderTime);
-	}
-
-	{
-		const newCommentText = newComment.querySelector(".comment-text");
-		newCommentText.innerHTML = commentText;
-	}
-
-	commentSection.appendChild(newComment);
+		jsonPromise.then((responseData) => {
+			for (let i = 0; i < responseData.comments.length; i++)
+			{
+				addComment(responseData.comments[i].author.name, responseData.comments[i].text);
+			}
+		});
+	});
 }
-*/
 
 function renderComments() {
-	// Cleaning up
+	// ----- Cleaning up -----
+
 	commentSection.innerHTML = "";
 
-	// Filling the comment section
-	for (let i = 0; i < gComments.length; i++)
-	{
-		const comment = gComments[i];
-		const newComment = comment.getCommentCode();
 	
-		commentSection.appendChild(newComment);
+	// ----- Filling the comment section -----
+
+	for (let i = 0; i < comments.length; i++)
+	{
+		const comment = comments[i];
+		commentSection.appendChild(comment.getCommentCode());
 	}
 }
 
 function addComment(headerText, commentText) {
 	const newComment = new CComment(headerText, commentText);
-	gComments.push(newComment);
+	comments.push(newComment);
+
+	const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
+		{
+			method: "POST",
+			body: JSON.stringify(newComment.getRawCommentData())
+		});
 
 	renderComments();
 }
 
 window.addEventListener("load", () => {
+	LoadAllComments();
+
 	const nameInput = document.querySelector(".add-form-name");
 	const commentText = document.querySelector(".add-form-text");
 
