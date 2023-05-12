@@ -6,27 +6,12 @@ let comments = [];
 
 // Comment class
 class CComment {
-	constructor(headerText, commentText) {
+	constructor(headerText, commentText, addDate) {
 		this.headerText = headerText;
 		this.commentText = commentText;
 		this.likeCount = 0;
 		this.isLikedByUser = false;
-
-		{
-			let currTime = new Date();
-
-			this.addTime = currTime.getDate() + '.' + (currTime.getMonth() + 1) + '.' + currTime.getFullYear() +
-				' ' + currTime.getHours() + ':' + currTime.getMinutes();
-		}
-	}
-
-	getRawCommentData() {
-		let rawCommentData = {
-			"name": this.commentText,
-			"text": this.headerText
-		};
-
-		return rawCommentData;
+		this.addDate = addDate;
 	}
 
 	getCommentCode() {
@@ -49,7 +34,7 @@ class CComment {
 			let currTime = new Date();
 	
 			const newCommentHeaderTime = document.createElement("div");
-			newCommentHeaderTime.innerHTML = this.addTime;
+			newCommentHeaderTime.innerHTML = this.addDate;
 			newCommentHeader.appendChild(newCommentHeaderTime);
 		}
 	
@@ -115,7 +100,7 @@ const commentTemplate = '<div class="comment-header"></div><div class="comment-b
 	<span class="likes-counter"></span><button class="like-button"></button></div></div>';
 
 
-function LoadAllComments() {
+function updateComments() {
 	const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
 		{
 			method: "GET"
@@ -125,10 +110,17 @@ function LoadAllComments() {
 		const jsonPromise = response.json();
 
 		jsonPromise.then((responseData) => {
-			for (let i = 0; i < responseData.comments.length; i++)
+			for (let i = comments.length; i < responseData.comments.length; i++)
 			{
-				addComment(responseData.comments[i].author.name, responseData.comments[i].text);
+				let addDate = String(responseData.comments[i].date);
+				addDate = addDate.replace(/([0-9]+)-([0-9]+)-([0-9]+)T([0-9]+:[0-9]+:[0-9]+).[0-9]+Z/, "$3.$2.$1 $4");
+
+				const newComment = new CComment(responseData.comments[i].author.name, responseData.comments[i].text,
+					addDate);
+				comments.push(newComment);
 			}
+
+			renderComments();
 		});
 	});
 }
@@ -149,21 +141,23 @@ function renderComments() {
 }
 
 function addComment(headerText, commentText) {
-	const newComment = new CComment(headerText, commentText);
-	comments.push(newComment);
+	let rawCommentData = {
+		"name": headerText,
+		"text": commentText
+	};
 
 	const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
 		{
 			method: "POST",
-			body: JSON.stringify(newComment.getRawCommentData())
+			body: JSON.stringify(rawCommentData)
 		});
-
-	renderComments();
+	
+	fetchPromise.then(() => {
+		updateComments();
+	});
 }
 
 window.addEventListener("load", () => {
-	LoadAllComments();
-
 	const nameInput = document.querySelector(".add-form-name");
 	const commentText = document.querySelector(".add-form-text");
 
@@ -193,4 +187,6 @@ window.addEventListener("load", () => {
 	commentText.addEventListener("click", (event) => {
 		event.target.classList.remove("invalid-el");
 	});
+
+	updateComments();
 });
