@@ -114,39 +114,39 @@ function updateComments() {
 
 	body.appendChild(notificationDiv);
 
-	const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
+	fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
 		{
 			method: "GET"
-		});
-	
-	fetchPromise.then((response) => {
-		if (response.status == 404)
-		{
-			notificationDiv.innerHTML = "<h1>Произошла ошибка загрузки данных</h1>";
-			removeNotification(notificationDiv, 5000);
-		}
-		else
-		{
-			const jsonPromise = response.json();
-
-			jsonPromise.then((responseData) => {
-				for (let i = comments.length; i < responseData.comments.length; i++)
+		}).then((response) => {
+				if (response.status == 404)
 				{
-					let addDate = String(responseData.comments[i].date);
-					addDate = addDate.replace(/([0-9]+)-([0-9]+)-([0-9]+)T([0-9]+:[0-9]+:[0-9]+).[0-9]+Z/, "$3.$2.$1 $4");
-	
-					const newComment = new CComment(responseData.comments[i].author.name, responseData.comments[i].text,
-						addDate);
-					comments.push(newComment);
+					notificationDiv.innerHTML = "<h1>Произошла ошибка загрузки данных</h1>";
+					removeNotification(notificationDiv, 5000);
+
+					addFormButton.classList.remove("hidden");
 				}
+				else
+				{
+					return response.json();
+				}
+			}).then((responseData) => {
+					for (let i = comments.length; i < responseData.comments.length; i++)
+					{
+						let addDate = String(responseData.comments[i].date);
+						addDate = addDate.replace(/([0-9]+)-([0-9]+)-([0-9]+)T([0-9]+:[0-9]+:[0-9]+).[0-9]+Z/, "$3.$2.$1 $4");
+			
+						const newComment = new CComment(responseData.comments[i].author.name, responseData.comments[i].text,
+							addDate);
+						comments.push(newComment);
+					}
 
-				removeNotification(notificationDiv, 5000);
-				renderComments();
-			});
+					addFormButton.classList.remove("hidden");
 
-			notificationDiv.innerHTML = "<h1>Комментарии были успешно загружены</h1>";
-		}
-	});
+					notificationDiv.innerHTML = "<h1>Комментарии были успешно загружены</h1>";
+					removeNotification(notificationDiv, 5000);
+
+					renderComments();
+				});
 }
 
 function renderComments() {
@@ -180,24 +180,24 @@ function addComment(headerText, commentText) {
 		{
 			method: "POST",
 			body: JSON.stringify(rawCommentData)
-		});
-	
-	fetchPromise.then((response) => {
-		if (response.status == 404)
-		{
-			notificationDiv.innerHTML = "<h1>Произошла ошибка. Комментарий не был отправлен</h1>";
-			removeNotification(notificationDiv, 1000);
-		}
-		else
-		{
-			notificationDiv.innerHTML = "<h1>Комментарий был загружен</h1>";
-			removeNotification(notificationDiv, 1000);
+		}).then((response) => {
+				if (response.status == 404)
+				{
+					notificationDiv.innerHTML = "<h1>Произошла ошибка. Комментарий не был отправлен</h1>";
+					removeNotification(notificationDiv, 1000);
+				}
+				else
+				{
+					notificationDiv.innerHTML = "<h1>Комментарий был загружен</h1>";
+					removeNotification(notificationDiv, 1000);
 
-			setTimeout(() => {
-					updateComments();
-				}, 1500);
-		}
-	});
+					setTimeout(() => {
+							updateComments();
+						}, 1500);
+				}
+
+				addFormButton.classList.add("hidden");
+			});
 }
 
 window.addEventListener("load", () => {

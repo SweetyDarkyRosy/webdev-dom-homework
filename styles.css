@@ -153,6 +153,11 @@ gap: 24px;
     #722d6a 100%);
 }
 
+.hidden
+{
+  display: none;
+}
+
 .notification h1
 {
   margin: 0;
