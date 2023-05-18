@@ -120,10 +120,15 @@ function updateComments() {
 		}).then((response) => {
 				if (response.status == 404)
 				{
-					notificationDiv.innerHTML = "<h1>Произошла ошибка загрузки данных</h1>";
-					removeNotification(notificationDiv, 5000);
-
-					addFormButton.classList.remove("hidden");
+					Promise.reject("Ошибка соединения");
+				}
+				else if (response.status == 400)
+				{
+					Promise.reject("Неверный запрос");
+				}
+				else if (response.status == 500)
+				{
+					Promise.reject("Неисправность на сервере");
 				}
 				else
 				{
@@ -146,7 +151,14 @@ function updateComments() {
 					removeNotification(notificationDiv, 5000);
 
 					renderComments();
-				});
+				}).catch((error) => {
+						notificationDiv.innerHTML = "<h1>Произошла ошибка загрузки данных</h1>";
+						removeNotification(notificationDiv, 5000);
+
+						addFormButton.classList.remove("hidden");
+
+						console.error(error);
+					});
 }
 
 function renderComments() {
@@ -176,28 +188,40 @@ function addComment(headerText, commentText) {
 
 	body.appendChild(notificationDiv);
 	
-	const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
+	fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
 		{
 			method: "POST",
 			body: JSON.stringify(rawCommentData)
 		}).then((response) => {
 				if (response.status == 404)
 				{
-					notificationDiv.innerHTML = "<h1>Произошла ошибка. Комментарий не был отправлен</h1>";
-					removeNotification(notificationDiv, 1000);
+					Promise.reject("Ошибка соединения");
+				}
+				else if (response.status == 400)
+				{
+					Promise.reject("Неверный запрос");
+				}
+				else if (response.status == 500)
+				{
+					Promise.reject("Неисправность на сервере");
 				}
 				else
 				{
 					notificationDiv.innerHTML = "<h1>Комментарий был загружен</h1>";
 					removeNotification(notificationDiv, 1000);
 
+					addFormButton.classList.add("hidden");
+
 					setTimeout(() => {
 							updateComments();
 						}, 1500);
 				}
+			}).catch((error) => {
+					notificationDiv.innerHTML = "<h1>Произошла ошибка. Комментарий не был отправлен</h1>";
+					removeNotification(notificationDiv, 1000);
 
-				addFormButton.classList.add("hidden");
-			});
+					console.error(error);
+				});
 }
 
 window.addEventListener("load", () => {
