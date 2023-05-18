@@ -1,3 +1,4 @@
+const body = document.querySelector("body");
 const addFormButton = document.querySelector(".add-form-button");
 const commentSection = document.querySelector(".comments");
 
@@ -100,29 +101,52 @@ const commentTemplate = '<div class="comment-header"></div><div class="comment-b
 	<span class="likes-counter"></span><button class="like-button"></button></div></div>';
 
 
+function removeNotification(notification, delay) {
+	setTimeout(() => {
+			body.removeChild(notification)
+		}, delay);
+}
+
 function updateComments() {
-	const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
+	const notificationDiv = document.createElement('DIV');
+	notificationDiv.classList.add('notification');
+	notificationDiv.innerHTML = "<h1>Обновление списка комментариев</h1>"
+
+	body.appendChild(notificationDiv);
+
+	fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
 		{
 			method: "GET"
-		});
-	
-	fetchPromise.then((response) => {
-		const jsonPromise = response.json();
+		}).then((response) => {
+				if (response.status == 404)
+				{
+					notificationDiv.innerHTML = "<h1>Произошла ошибка загрузки данных</h1>";
+					removeNotification(notificationDiv, 5000);
 
-		jsonPromise.then((responseData) => {
-			for (let i = comments.length; i < responseData.comments.length; i++)
-			{
-				let addDate = String(responseData.comments[i].date);
-				addDate = addDate.replace(/([0-9]+)-([0-9]+)-([0-9]+)T([0-9]+:[0-9]+:[0-9]+).[0-9]+Z/, "$3.$2.$1 $4");
+					addFormButton.classList.remove("hidden");
+				}
+				else
+				{
+					return response.json();
+				}
+			}).then((responseData) => {
+					for (let i = comments.length; i < responseData.comments.length; i++)
+					{
+						let addDate = String(responseData.comments[i].date);
+						addDate = addDate.replace(/([0-9]+)-([0-9]+)-([0-9]+)T([0-9]+:[0-9]+:[0-9]+).[0-9]+Z/, "$3.$2.$1 $4");
+			
+						const newComment = new CComment(responseData.comments[i].author.name, responseData.comments[i].text,
+							addDate);
+						comments.push(newComment);
+					}
 
-				const newComment = new CComment(responseData.comments[i].author.name, responseData.comments[i].text,
-					addDate);
-				comments.push(newComment);
-			}
+					addFormButton.classList.remove("hidden");
 
-			renderComments();
-		});
-	});
+					notificationDiv.innerHTML = "<h1>Комментарии были успешно загружены</h1>";
+					removeNotification(notificationDiv, 5000);
+
+					renderComments();
+				});
 }
 
 function renderComments() {
@@ -146,15 +170,34 @@ function addComment(headerText, commentText) {
 		"text": commentText
 	};
 
+	const notificationDiv = document.createElement('DIV');
+	notificationDiv.classList.add('notification');
+	notificationDiv.innerHTML = "<h1>Добавление комментариев</h1>"
+
+	body.appendChild(notificationDiv);
+	
 	const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
 		{
 			method: "POST",
 			body: JSON.stringify(rawCommentData)
-		});
-	
-	fetchPromise.then(() => {
-		updateComments();
-	});
+		}).then((response) => {
+				if (response.status == 404)
+				{
+					notificationDiv.innerHTML = "<h1>Произошла ошибка. Комментарий не был отправлен</h1>";
+					removeNotification(notificationDiv, 1000);
+				}
+				else
+				{
+					notificationDiv.innerHTML = "<h1>Комментарий был загружен</h1>";
+					removeNotification(notificationDiv, 1000);
+
+					setTimeout(() => {
+							updateComments();
+						}, 1500);
+				}
+
+				addFormButton.classList.add("hidden");
+			});
 }
 
 window.addEventListener("load", () => {
