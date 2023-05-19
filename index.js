@@ -1,6 +1,7 @@
 const body = document.querySelector("body");
 const addFormButton = document.querySelector(".add-form-button");
 const commentSection = document.querySelector(".comments");
+const notificationSection = document.querySelector(".notification-section");
 
 let comments = [];
 
@@ -101,18 +102,37 @@ const commentTemplate = '<div class="comment-header"></div><div class="comment-b
 	<span class="likes-counter"></span><button class="like-button"></button></div></div>';
 
 
+function addDefaultNotification(notificationText) {
+	const notificationDiv = document.createElement('DIV');
+	notificationDiv.classList.add('notification');
+	notificationDiv.classList.add('default-notification-style');
+	notificationDiv.innerHTML = "<h1>" + notificationText + "</h1>";
+
+	notificationSection.appendChild(notificationDiv);
+
+	return notificationDiv;
+}
+
+function addErrorNotification(notificationText) {
+	const notificationDiv = document.createElement('DIV');
+	notificationDiv.classList.add('notification');
+	notificationDiv.classList.add('error-notification-style');
+	notificationDiv.innerHTML = "<h1>" + notificationText + "</h1>";
+
+	notificationSection.appendChild(notificationDiv);
+
+	return notificationDiv;
+}
+
 function removeNotification(notification, delay) {
 	setTimeout(() => {
-			body.removeChild(notification)
+			notificationSection.removeChild(notification)
 		}, delay);
 }
 
 function updateComments() {
-	const notificationDiv = document.createElement('DIV');
-	notificationDiv.classList.add('notification');
-	notificationDiv.innerHTML = "<h1>Обновление списка комментариев</h1>"
-
-	body.appendChild(notificationDiv);
+	const updateNotification = addDefaultNotification("Обновление списка комментариев");
+	removeNotification(updateNotification, 2000);
 
 	fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
 		{
@@ -120,14 +140,18 @@ function updateComments() {
 		}).then((response) => {
 				if (response.status == 404)
 				{
+					const internetErrorNotification = addErrorNotification("Ошибка подключения");
+					removeNotification(internetErrorNotification, 2000);
+
+					alert("Кажется, у вас сломался интернет, попробуйте позже");
 					Promise.reject("Ошибка соединения");
-				}
-				else if (response.status == 400)
-				{
-					Promise.reject("Неверный запрос");
 				}
 				else if (response.status == 500)
 				{
+					const serverErrorNotification = addErrorNotification("Неисправность на сервере");
+					removeNotification(serverErrorNotification, 2000);
+
+					alert("Сервер сломался, попробуй позже");
 					Promise.reject("Неисправность на сервере");
 				}
 				else
@@ -147,13 +171,13 @@ function updateComments() {
 
 					addFormButton.classList.remove("hidden");
 
-					notificationDiv.innerHTML = "<h1>Комментарии были успешно загружены</h1>";
-					removeNotification(notificationDiv, 5000);
+					const successNotification = addDefaultNotification("Комментарии были успешно загружены");
+					removeNotification(successNotification, 3000);
 
 					renderComments();
 				}).catch((error) => {
-						notificationDiv.innerHTML = "<h1>Произошла ошибка загрузки данных</h1>";
-						removeNotification(notificationDiv, 5000);
+						const commonErrorNotification = addErrorNotification("Произошла ошибка загрузки данных");
+						removeNotification(commonErrorNotification, 2000);
 
 						addFormButton.classList.remove("hidden");
 
@@ -182,11 +206,8 @@ function addComment(headerText, commentText) {
 		"text": commentText
 	};
 
-	const notificationDiv = document.createElement('DIV');
-	notificationDiv.classList.add('notification');
-	notificationDiv.innerHTML = "<h1>Добавление комментариев</h1>"
-
-	body.appendChild(notificationDiv);
+	const addCommentNotification = addDefaultNotification("Добавление комментария");
+	removeNotification(addCommentNotification, 2000);
 	
 	fetch("https://webdev-hw-api.vercel.app/api/v1/viktoriia-pashchenko/comments",
 		{
@@ -195,30 +216,55 @@ function addComment(headerText, commentText) {
 		}).then((response) => {
 				if (response.status == 404)
 				{
+					const internetErrorNotification = addErrorNotification("Ошибка подключения");
+					removeNotification(internetErrorNotification, 2000);
+
+					alert("Кажется, у вас сломался интернет, попробуйте позже");
 					Promise.reject("Ошибка соединения");
 				}
 				else if (response.status == 400)
 				{
+					const serverErrorNotification = addErrorNotification("Условия не были выполнены");
+					removeNotification(serverErrorNotification, 2000);
+
+					alert("Имя и комментарий должны быть не короче 3 символов");
+
+					const nameInput = document.querySelector(".add-form-name");
+					nameInput.value = '';
+
+					const commentText = document.querySelector(".add-form-text");
+					commentText.value = '';
+
 					Promise.reject("Неверный запрос");
 				}
 				else if (response.status == 500)
 				{
+					const serverErrorNotification = addErrorNotification("Неисправность на сервере");
+					removeNotification(serverErrorNotification, 2000);
+
+					alert("Сервер сломался, попробуй позже");
 					Promise.reject("Неисправность на сервере");
 				}
 				else
 				{
-					notificationDiv.innerHTML = "<h1>Комментарий был загружен</h1>";
-					removeNotification(notificationDiv, 1000);
+					const successNotification = addDefaultNotification("Комментарий был загружен");
+					removeNotification(successNotification, 3000);
 
 					addFormButton.classList.add("hidden");
+
+					const nameInput = document.querySelector(".add-form-name");
+					nameInput.value = '';
+
+					const commentText = document.querySelector(".add-form-text");
+					commentText.value = '';
 
 					setTimeout(() => {
 							updateComments();
 						}, 1500);
 				}
 			}).catch((error) => {
-					notificationDiv.innerHTML = "<h1>Произошла ошибка. Комментарий не был отправлен</h1>";
-					removeNotification(notificationDiv, 1000);
+					const commonErrorNotification = addErrorNotification("Произошла ошибка. Комментарий не был отправлен");
+					removeNotification(commonErrorNotification, 2000);
 
 					console.error(error);
 				});
@@ -242,9 +288,6 @@ window.addEventListener("load", () => {
 		}
 
 		addComment(nameInput.value, commentText.value);
-
-		nameInput.value = '';
-		commentText.value = '';
 	});
 
 	nameInput.addEventListener("click", (event) => {
