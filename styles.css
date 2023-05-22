@@ -138,24 +138,22 @@ gap: 24px;
   border: 4px solid red;
 }
 
+.notification-section
+{
+  margin: inherit;
+  padding: 10px;
+
+  width: 100%;
+
+  position: fixed;
+  bottom: 0;
+}
+
 .notification {
   padding: 4px;
 
   width: 100%;
   height: 24px;
-
-  position: fixed;
-  bottom: 0;
-
-  background: radial-gradient(
-    75.42% 75.42% at 50% 42.37%,
-    rgba(53, 53, 53, 0) 22.92%,
-    #722d6a 100%);
-}
-
-.hidden
-{
-  display: none;
 }
 
 .notification h1
@@ -170,3 +168,25 @@ gap: 24px;
 
   font-size: 18px;
 }
+
+.default-notification-style
+{
+  background: radial-gradient(
+    75.42% 75.42% at 50% 42.37%,
+    rgba(53, 53, 53, 0) 22.92%,
+    #882e7d 100%);
+}
+
+.error-notification-style
+{
+  background: radial-gradient(
+    75.42% 75.42% at 50% 42.37%,
+    rgba(53, 53, 53, 0) 22.92%,
+    #6c112c 100%);
+}
+
+.hidden
+{
+  display: none;
+}
+
