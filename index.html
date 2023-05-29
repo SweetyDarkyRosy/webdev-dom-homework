@@ -1,32 +1,20 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Проект "Комменты"</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="index.js"></script>
-  </head>
+	<head>
+		<title>Проект "Комменты"</title>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="styles.css" />
+		<script type="module" src="index.js"></script>
+	</head>
 
-  <body>
-    <div class="container">
-      <ul class="comments"></ul>
-      <div class="add-form">
-        <input
-          type="text"
-          class="add-form-name"
-          placeholder="Введите ваше имя"
-        />
-        <textarea
-          type="textarea"
-          class="add-form-text"
-          placeholder="Введите ваш коментарий"
-          rows="4"
-        ></textarea>
-        <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
-        </div>
-      </div>
-    </div>
-    <section class="notification-section"></section>
-  </body>
+	<body>
+		<section class="authorization-header">
+			<button class="simple-button register-button">Зарегистрироваться</button>
+			<button class="simple-button login-button">Войти</button>
+		</section>
+		<div class="container">
+			<ul class="comments"></ul>
+		</div>
+		<section class="notification-section"></section>
+	</body>
 </html>
