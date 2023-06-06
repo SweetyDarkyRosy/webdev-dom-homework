@@ -1,5 +1,6 @@
-import { renderComments } from "./render.js";
-import { body, commentSection, notificationSection, comments } from "./index.js";
+import { renderComments } from "./render.js"
+import { body, commentSection, notificationSection, comments } from "./index.js"
+import { format } from 'date-fns'
 
 
 // Comment template for HTML code
@@ -49,7 +50,7 @@ class CComment {
 
 			newCommentHeader.appendChild(newCommentHeaderName);
 	
-			let currTime = new Date();
+			//let currTime = new Date();
 	
 			const newCommentHeaderTime = document.createElement("div");
 			newCommentHeaderTime.innerHTML = this.addDate;
@@ -172,11 +173,16 @@ export function updateComments() {
 			}).then((responseData) => {
 					for (let i = comments.length; i < responseData.comments.length; i++)
 					{
+						/* DEPRECATED
 						let addDate = String(responseData.comments[i].date);
 						addDate = addDate.replace(/([0-9]+)-([0-9]+)-([0-9]+)T([0-9]+:[0-9]+:[0-9]+).[0-9]+Z/, "$3.$2.$1 $4");
-			
-						const newComment = new CComment(responseData.comments[i].author.name, responseData.comments[i].text,
-							addDate);
+						*/
+
+						let addDate = new Date(responseData.comments[i].date);
+						let addDateStr = format(addDate, "yyyy-MM-dd hh.mm.ss");
+						//let addDate = format()
+
+						const newComment = new CComment(responseData.comments[i].author.name, responseData.comments[i].text, addDateStr);
 						comments.push(newComment);
 					}
 
